@@ -68,7 +68,7 @@ const config = {
 
   // Admin whitelist
   WHITELIST_ADMINS_MAIL: [
-    'mohammadsadee24@gmail.com',
+    'christineberny77@gmail.com',
     'tokeeabdullah5@gmail.com',
     'tests@gmail.com',
   ],
