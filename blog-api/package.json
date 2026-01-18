@@ -2,12 +2,14 @@
   "name": "blog-api",
   "version": "1.0.0",
   "main": "dist/server.js",
+  "license": "Apache-2.0",
+
   "scripts": {
-    "build": "tsc && tsc-alias",
-    "dev": "nodemon src/server.ts",
+    "dev": "nodemon --exec ts-node -r tsconfig-paths/register src/server.ts",
+    "build": "tsc && tsc-alias && npm install && npm install --prefix client && npm run build --prefix client",
     "start": "node dist/server.js"
   },
-  "license": "Apache-2.0",
+
   "dependencies": {
     "@logtail/node": "^0.5.6",
     "@logtail/winston": "^0.5.6",
@@ -29,6 +31,7 @@
     "resend": "^6.7.0",
     "winston": "^3.19.0"
   },
+
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
     "@types/compression": "^1.8.1",
