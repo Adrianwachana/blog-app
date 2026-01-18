@@ -6,8 +6,8 @@
 
   "scripts": {
     "dev": "nodemon --exec ts-node -r tsconfig-paths/register src/server.ts",
-    "build": "tsc && tsc-alias && npm install && npm install --prefix client && npm run build --prefix client",
-    "start": "node dist/server.js"
+    "build": "npm install --prefix blog-api && npm run build --prefix blog-api && npm install --prefix client && npm run build --prefix client",
+    "start": "node blog-api/dist/server.js"
   },
 
   "dependencies": {
