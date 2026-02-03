@@ -7,7 +7,9 @@ import * as React from "react";
 import { Facebook, Instagram, Linkedin, Youtube } from "lucide-react";
 import ButterflyLogo from "./ButterflyLogo";
 
-// Defined missing footer links data
+/**
+ * Footer navigation links
+ */
 const FOOTER_LINKS = [
   {
     title: "Explore",
@@ -23,20 +25,26 @@ const FOOTER_LINKS = [
   },
 ] as const;
 
+/**
+ * Social media links
+ */
 const SOCIAL_LINKS = [
-  { href: "https://facebook.com/Adrianwachana", Icon: Facebook, label: "Facebook" },
-  { href: "https://instagram.com/Adrianwachana", Icon: Instagram, label: "Instagram" },
-  { href: "https://linkedin.com/in/Adrianwachana", Icon: Linkedin, label: "LinkedIn" },
-  { href: "https://youtube.com/Adrianwachana", Icon: Youtube, label: "YouTube" },
+  { href: "https://facebook.com/mindyourbusinessofficial", Icon: Facebook, label: "Facebook" },
+  { href: "https://instagram.com/mindyourbusinessofficial", Icon: Instagram, label: "Instagram" },
+  { href: "https://linkedin.com/in/mindyourbusinessofficial", Icon: Linkedin, label: "LinkedIn" },
+  { href: "https://youtube.com/mindyourbusinessofficial", Icon: Youtube, label: "YouTube" },
 ] as const;
 
+/**
+ * Footer component
+ */
 export const Footer = ({ className, ...props }: React.ComponentProps<"footer">) => {
   return (
-    <footer className="bg-foreground text-background py-16" {...props}>
+    <footer className={`bg-foreground text-background py-16 ${className ?? ""}`} {...props}>
       <div className="container">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
-          
-          {/* Brand */}
+
+          {/* Brand Section */}
           <div className="lg:col-span-2">
             <a href="/" className="flex items-center gap-3 mb-4 group w-fit">
               <div className="group-hover:scale-110 transition-transform duration-300 [&_svg]:drop-shadow-lg">
@@ -50,7 +58,7 @@ export const Footer = ({ className, ...props }: React.ComponentProps<"footer">) 
               Sharing stories, adventures, and insights from around the world. 
               Join me on this journey of discovery and connection.
             </p>
-            
+
             {/* Social Media Links */}
             <div className="flex gap-3">
               {SOCIAL_LINKS.map((social) => (
@@ -95,8 +103,10 @@ export const Footer = ({ className, ...props }: React.ComponentProps<"footer">) 
           <p className="text-sm text-background/60">
             © {new Date().getFullYear()} Bearbubbles. All rights reserved.
           </p>
-          <p className="text-sm text-background/60">
-            Made with ❤️ and curiosity
+
+          {/* Brand display with logo */}
+          <p className="text-sm text-background/60 flex items-center gap-1 font-bold">
+            <ButterflyLogo size="sm" /> Bearbubbles
           </p>
         </div>
       </div>

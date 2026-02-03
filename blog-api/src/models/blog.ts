@@ -100,9 +100,33 @@ const blogSchema = new Schema<IBlog>(
   },
 );
 
+/**
+ * FIX: after genSlug produces the base slug, we:
+ * 1) Force lowercase here (defensive safety in case genSlug changes)
+ * 2) Strip any characters that are not a–z, 0–9, or a hyphen
+ *    (removes commas, periods, emojis, and other punctuation)
+ * 3) Collapse consecutive hyphens into one
+ * 4) Trim leading and trailing hyphens
+ *
+ * This ensures a title like:
+ *   "Into the Glade, Uninvited."
+ * never produces:
+ *   "into-the-glade,-uninvited.-xxxxx"
+ * and instead becomes:
+ *   "into-the-glade-uninvited-xxxxx"
+ *
+ * NOTE:
+ * The slug is generated only once (when it does not already exist)
+ * to preserve URL stability and SEO if the title is edited later.
+ */
 blogSchema.pre('validate', function (this: HydratedDocument<IBlog>) {
   if (this.title && !this.slug) {
-    this.slug = genSlug(this.title);
+    const raw = genSlug(this.title).toLowerCase();
+
+    this.slug = raw
+      .replace(/[^a-z0-9-]/g, '') // keep only lowercase letters, digits, and hyphens
+      .replace(/-+/g, '-')        // collapse multiple hyphens into one
+      .replace(/^-|-$/g, '');     // trim leading and trailing hyphens
   }
 });
 

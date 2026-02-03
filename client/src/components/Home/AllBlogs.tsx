@@ -62,9 +62,9 @@ export const AllBlogs = ({
       className={cn('section', className)}
       {...props}
     >
-      <div className='container'>
+      <div className="container">
         <motion.h2
-          className='section-title'
+          className="section-title"
           initial={{ opacity: 0 }}
           animate={{
             opacity: 1,
@@ -79,14 +79,14 @@ export const AllBlogs = ({
 
         {/* ✅ Empty state */}
         {blogs.length === 0 ? (
-          <p className='text-center text-muted-foreground'>
+          <p className="text-center text-muted-foreground">
             No blog posts available.
           </p>
         ) : (
           <motion.ul
-            className='grid gap-4 lg:grid-cols-2 xl:grid-cols-3'
-            initial='from'
-            whileInView='to'
+            className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3"
+            initial="from"
+            whileInView="to"
             viewport={{ once: true }}
             variants={listVariant}
           >
@@ -103,17 +103,17 @@ export const AllBlogs = ({
                     title={title}
                     content={content}
                     slug={slug}
-                    authorName={`${author.firstName} ${author.lastName}`}
+                    authorName={author.username}
                     publishedAt={publishedAt}
                   />
                 </motion.li>
-              )
+              ),
             )}
           </motion.ul>
         )}
 
         <motion.div
-          className='mt-8 flex justify-center md:mt-10'
+          className="mt-8 flex justify-center md:mt-10"
           initial={{ opacity: 0 }}
           animate={{
             opacity: 1,
@@ -123,8 +123,8 @@ export const AllBlogs = ({
             },
           }}
         >
-          <Button size='lg' asChild>
-            <Link to='/blogs' viewTransition>
+          <Button size="lg" asChild>
+            <Link to="/blogs" viewTransition>
               See all blogs
             </Link>
           </Button>
