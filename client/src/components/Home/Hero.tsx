@@ -131,3 +131,5 @@ export const Hero = () => {
     </section>
   );
 };
+
+// tests
