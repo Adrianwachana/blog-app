@@ -1,74 +1,3 @@
-// /**
-//  * @copyright 2026 Adrianwachana
-//  * @license Apache-2.0
-//  */
-
-// /**
-//  * Custom modules
-//  */
-// import { logger } from '@/lib/winston';
-
-// /**
-//  * Models
-//  */
-// import Blog from '@/models/blog';
-// import User from '@/models/user';
-
-// /**
-//  * Types
-//  */
-// import type { Request, Response } from 'express';
-
-// const getBlogBySlug = async (req: Request, res: Response) => {
-//   try {
-//     const userId = req.userId;
-//     const slug = req.params.slug;
-
-//     const user = await User.findById(userId).select('role').exec();
-//     const blog = await Blog.findOne({ slug })
-//       .select('-banner.publicId -__v')
-//       .populate('author', '-createdAt -updatedAt -__v')
-//       .lean()
-//       .exec();
-
-//     if (!blog) {
-//       res.status(404).json({
-//         code: 'NotFound',
-//         message: 'Blog not found',
-//       });
-//       return;
-//     }
-
-//     if (user?.role === 'user' && blog.status === 'draft') {
-//       res.status(403).json({
-//         code: 'AuthorizationError',
-//         message: 'Access denied, insufficient permissions',
-//       });
-
-//       logger.warn('A user tried to access a draft blog', {
-//         userId,
-//         blog,
-//       });
-//       return;
-//     }
-
-//     res.status(200).json({
-//       blog,
-//     });
-//   } catch (err) {
-//     res.status(500).json({
-//       code: 'ServerError',
-//       message: 'Internal server error',
-//       error: err,
-//     });
-
-//     logger.error('Error while fetching blog by slug', err);
-//   }
-// };
-
-// export default getBlogBySlug;
-
-
 /**
  * @copyright 2026 Adrianwachana
  * @license Apache-2.0
@@ -95,10 +24,7 @@ const getBlogBySlug = async (req: Request, res: Response) => {
     const userId = req.userId;
     const slug = req.params.slug;
 
-    const user = userId
-      ? await User.findById(userId).select('role').lean().exec()
-      : null;
-
+    const user = await User.findById(userId).select('role').exec();
     const blog = await Blog.findOne({ slug })
       .select('-banner.publicId -__v')
       .populate('author', '-createdAt -updatedAt -__v')
@@ -113,17 +39,15 @@ const getBlogBySlug = async (req: Request, res: Response) => {
       return;
     }
 
-    // FIX: block draft access for both unauthenticated visitors AND
-    // regular users — previously !user (unauthenticated) bypassed this guard
-    if ((!user || user.role === 'user') && blog.status === 'draft') {
+    if (user?.role === 'user' && blog.status === 'draft') {
       res.status(403).json({
         code: 'AuthorizationError',
         message: 'Access denied, insufficient permissions',
       });
 
-      logger.warn('Attempted access to a draft blog by non-admin', {
-        userId: userId ?? 'unauthenticated',
-        slug,
+      logger.warn('A user tried to access a draft blog', {
+        userId,
+        blog,
       });
       return;
     }
@@ -143,3 +67,79 @@ const getBlogBySlug = async (req: Request, res: Response) => {
 };
 
 export default getBlogBySlug;
+
+
+// /**
+//  * @copyright 2026 Adrianwachana
+//  * @license Apache-2.0
+//  */
+
+// /**
+//  * Custom modules
+//  */
+// import { logger } from '@/lib/winston';
+
+// /**
+//  * Models
+//  */
+// import Blog from '@/models/blog';
+// import User from '@/models/user';
+
+// /**
+//  * Types
+//  */
+// import type { Request, Response } from 'express';
+
+// const getBlogBySlug = async (req: Request, res: Response) => {
+//   try {
+//     const userId = req.userId;
+//     const slug = req.params.slug;
+
+//     const user = userId
+//       ? await User.findById(userId).select('role').lean().exec()
+//       : null;
+
+//     const blog = await Blog.findOne({ slug })
+//       .select('-banner.publicId -__v')
+//       .populate('author', '-createdAt -updatedAt -__v')
+//       .lean()
+//       .exec();
+
+//     if (!blog) {
+//       res.status(404).json({
+//         code: 'NotFound',
+//         message: 'Blog not found',
+//       });
+//       return;
+//     }
+
+//     // FIX: block draft access for both unauthenticated visitors AND
+//     // regular users — previously !user (unauthenticated) bypassed this guard
+//     if ((!user || user.role === 'user') && blog.status === 'draft') {
+//       res.status(403).json({
+//         code: 'AuthorizationError',
+//         message: 'Access denied, insufficient permissions',
+//       });
+
+//       logger.warn('Attempted access to a draft blog by non-admin', {
+//         userId: userId ?? 'unauthenticated',
+//         slug,
+//       });
+//       return;
+//     }
+
+//     res.status(200).json({
+//       blog,
+//     });
+//   } catch (err) {
+//     res.status(500).json({
+//       code: 'ServerError',
+//       message: 'Internal server error',
+//       error: err,
+//     });
+
+//     logger.error('Error while fetching blog by slug', err);
+//   }
+// };
+
+// export default getBlogBySlug;
