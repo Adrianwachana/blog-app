@@ -33,16 +33,20 @@ import httpLogger from '@/middlewares/httpLogger';
 import v1Routes from '@/routes/v1';
 
 /**
- * Express app initial
+ * Express app initialization
  */
 const app = express();
 
-// Enable HTTP request logging in production
+/**
+ * Enable HTTP request logging in production
+ */
 if (config.NODE_ENV === 'production') {
   app.use(httpLogger);
 }
 
-// Configure CORS options
+/**
+ * Configure CORS options
+ */
 const corsOptions: CorsOptions = {
   origin(origin, callback) {
     if (
@@ -52,65 +56,70 @@ const corsOptions: CorsOptions = {
     ) {
       callback(null, true);
     } else {
-      callback(
-        new Error(`CORS error: ${origin} is not allowed by CORS`),
-        false,
-      );
-      logger.warn(`CORS error: ${origin} is not allowed by CORS`);
+      const errorMessage = `CORS error: ${origin} is not allowed`;
+      logger.warn(errorMessage);
+      callback(new Error(errorMessage));
     }
   },
   credentials: true,
 };
 
-// Apply CORS middleware
+/**
+ * Apply CORS middleware
+ */
 app.use(cors(corsOptions));
 
-// Enable JSON request body parsing
-app.use(express.json());
+/**
+ * BODY PARSERS
+ * Increase request payload limit to 5MB
+ */
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ limit: '5mb', extended: true }));
 
-// Enable URL-encoded request body parsing with extended mode
-app.use(express.urlencoded({ extended: true }));
-
+/**
+ * Parse cookies
+ */
 app.use(cookieParser());
 
-// Enable response compression to reduce payload size and improve performance
+/**
+ * Enable compression
+ */
 app.use(
   compression({
-    threshold: 1024, // Only compress responses larger than 1KB
+    threshold: 1024,
   }),
 );
 
-// Use Helmet to enhance security by setting various HTTP headers
+/**
+ * Security headers
+ */
 app.use(helmet());
 
-// Apply rate limiting middleware to prevent excessive requests and enhance security
+/**
+ * Rate limiting
+ */
 app.use(limiter);
 
 /**
- * IMPORTANT: API routes MUST come BEFORE static file serving
- * This ensures /api/v1/* routes work correctly
+ * API routes (must come before static files)
  */
 app.use('/api/v1', v1Routes);
 
 /**
- * Serve static files and handle client-side routing (PRODUCTION ONLY)
- * This should come AFTER all API routes
+ * Serve frontend in production
  */
 if (config.NODE_ENV === 'production') {
   const __dirname = path.resolve();
-  
-  // Serve static files from the React build folder
+
   app.use(express.static(path.join(__dirname, 'client', 'dist')));
 
-  // Catch-all route: serve index.html for any route not handled above
-  // This enables client-side routing (React Router, etc.)
   app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
   });
 }
 
 /**
- * Immediately Invoked Async Function Expression (IIFE) to start the server.
+ * Start server
  */
 (async () => {
   try {
@@ -120,8 +129,9 @@ if (config.NODE_ENV === 'production') {
       console.log(`Server running: http://localhost:${config.PORT}`);
       logger.info(`Server running: http://localhost:${config.PORT}`);
     });
+
   } catch (err) {
-    logger.error(`Failed to start the server`, err);
+    logger.error('Failed to start server', err);
 
     if (config.NODE_ENV === 'production') {
       process.exit(1);
@@ -130,12 +140,12 @@ if (config.NODE_ENV === 'production') {
 })();
 
 /**
- * Handles server shutdown gracefully by disconnecting from the database.
+ * Graceful shutdown
  */
 const handleServerShutdown = async () => {
   try {
     await disconnectFromDatabase();
-    logger.warn('Server SHUTDOWN');
+    logger.warn('Server shutdown');
     await logtail.flush();
     process.exit(0);
   } catch (err) {
