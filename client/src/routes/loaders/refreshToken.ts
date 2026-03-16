@@ -35,17 +35,19 @@ const refreshTokenLoader: LoaderFunction = async ({ request }) => {
     return redirect(redirectUri);
   } catch (err) {
     if (err instanceof AxiosError) {
-      const tokenExpired = err.response?.data.message.includes('token expired');
+      const message = err.response?.data?.message ?? '';
+      const tokenExpired =
+        typeof message === 'string' && message.includes('token expired');
 
-      if (tokenExpired) {
+      if (tokenExpired || err.response?.status === 401 || err.response?.status === 400) {
         localStorage.removeItem('user');
         localStorage.removeItem('accessToken');
         return redirect('/login');
       }
 
-      throw data(err.response?.data.message || err.message, {
+      throw data(message || err.message, {
         status: err.response?.status || err.status,
-        statusText: err.response?.data.code || err.code,
+        statusText: err.response?.data?.code || err.code,
       });
     }
 
