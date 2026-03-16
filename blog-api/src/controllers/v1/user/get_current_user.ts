@@ -24,6 +24,14 @@ const getCurrentUser = async (req: Request, res: Response): Promise<void> => {
 
     const user = await User.findById(userId).select('-__v').exec();
 
+    if (!user) {
+      res.status(404).json({
+        code: 'NotFound',
+        message: 'User not found',
+      });
+      return;
+    }
+
     res.status(200).json({
       user,
     });
