@@ -55,8 +55,8 @@ const login = async (req: Request, res: Response): Promise<void> => {
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: config.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: true,
+      sameSite: 'none',
     });
 
     res.status(200).json({
