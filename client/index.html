@@ -6,8 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Bearbubbles</title>
   </head>
+
   <body>
     <div id="root"></div>
+
+    <!-- Eruda (mobile dev tools) -->
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script>
+      // Only enable when #debug is in the URL
+      if (window.location.hash === "#debug") {
+        eruda.init();
+      }
+    </script>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
