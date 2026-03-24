@@ -23,7 +23,19 @@ import type { ActionResponse, BlogCreateResponse } from '@/types';
 const blogCreateAction: ActionFunction = async ({ request }) => {
   const formData = await request.formData();
 
-  const accessToken = localStorage.getItem('accessToken');
+  /**
+   * Safely read accessToken from localStorage.
+   * On iOS Safari (Private Browsing or strict ITP settings),
+   * localStorage access can throw instead of returning null,
+   * which would crash the action and silently prevent the post
+   * from reaching the database. The try/catch handles this.
+   */
+  let accessToken: string | null = null;
+  try {
+    accessToken = localStorage.getItem('accessToken');
+  } catch {
+    return redirect('/');
+  }
 
   if (!accessToken) return redirect('/');
 

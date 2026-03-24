@@ -38,6 +38,15 @@ import v1Routes from '@/routes/v1';
 const app = express();
 
 /**
+ * Trust the first proxy (e.g. Render's load balancer).
+ * MUST be set before rate-limiting middleware so that
+ * express-rate-limit can correctly read the real client IP
+ * from the X-Forwarded-For header instead of throwing
+ * ERR_ERL_UNEXPECTED_X_FORWARDED_FOR.
+ */
+app.set('trust proxy', 1);
+
+/**
  * Enable HTTP request logging in production
  */
 if (config.NODE_ENV === 'production') {
@@ -97,6 +106,8 @@ app.use(helmet());
 
 /**
  * Rate limiting
+ * trust proxy (set above) must be configured before this middleware
+ * so express-rate-limit can identify clients accurately.
  */
 app.use(limiter);
 
@@ -129,7 +140,6 @@ if (config.NODE_ENV === 'production') {
       console.log(`Server running: http://localhost:${config.PORT}`);
       logger.info(`Server running: http://localhost:${config.PORT}`);
     });
-
   } catch (err) {
     logger.error('Failed to start server', err);
 
