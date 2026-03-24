@@ -1,4 +1,3 @@
-```ts
 /**
  * @copyright 2026 Adrianwachana
  * @license Apache-2.0
@@ -142,4 +141,3 @@ const config = {
 };
 
 export default config;
-```
