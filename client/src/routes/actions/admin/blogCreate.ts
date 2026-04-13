@@ -33,7 +33,9 @@ const blogCreateAction: ActionFunction = async ({ request }) => {
   let accessToken: string | null = null;
   try {
     accessToken = localStorage.getItem('accessToken');
-  } catch {
+    console.log('[blogCreate] accessToken retrieved:', !!accessToken);
+  } catch (err) {
+    console.error('[blogCreate] localStorage error:', err);
     return redirect('/');
   }
 
@@ -54,6 +56,7 @@ const blogCreateAction: ActionFunction = async ({ request }) => {
     } as ActionResponse<BlogCreateResponse>;
   } catch (err) {
     if (err instanceof AxiosError) {
+      console.error('[blogCreate] API error:', err.response?.status, err.response?.data);
       return {
         ok: false,
         err: err.response?.data,

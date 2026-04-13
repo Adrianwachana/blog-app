@@ -33,7 +33,9 @@ const blogsAction: ActionFunction = async ({ request }) => {
   let accessToken: string | null = null;
   try {
     accessToken = localStorage.getItem('accessToken');
-  } catch {
+    console.log('[blogsAction] accessToken retrieved:', !!accessToken);
+  } catch (err) {
+    console.error('[blogsAction] localStorage error:', err);
     return redirect('/');
   }
 
@@ -49,6 +51,7 @@ const blogsAction: ActionFunction = async ({ request }) => {
     return { ok: true };
   } catch (err) {
     if (err instanceof AxiosError) {
+      console.error('[blogsAction] API error:', err.response?.status, err.response?.data);
       return {
         ok: false,
         err: err.response?.data,

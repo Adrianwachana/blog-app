@@ -34,7 +34,9 @@ const blogEditAction: ActionFunction = async ({ request, params }) => {
   let accessToken: string | null = null;
   try {
     accessToken = localStorage.getItem('accessToken');
-  } catch {
+    console.log('[blogEdit] accessToken retrieved:', !!accessToken);
+  } catch (err) {
+    console.error('[blogEdit] localStorage error:', err);
     return redirect('/');
   }
 
@@ -55,6 +57,7 @@ const blogEditAction: ActionFunction = async ({ request, params }) => {
     } as ActionResponse;
   } catch (err) {
     if (err instanceof AxiosError) {
+      console.error('[blogEdit] API error:', err.response?.status, err.response?.data);
       return {
         ok: false,
         err: err.response?.data,
