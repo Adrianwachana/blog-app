@@ -23,75 +23,102 @@ import type { UploadApiErrorResponse } from 'cloudinary';
 /**
  * Constants
  */
-const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2 MB
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB (adjust as needed)
 
 const uploadBlogBanner = (method: 'post' | 'put') => {
   return async (req: Request, res: Response, next: NextFunction) => {
-    if (method === 'put' && !req.file) {
-      next();
-      return;
-    }
-
-    if (!req.file) {
-      res.status(400).json({
-        code: 'ValidationError',
-        message: 'Blog banner is required',
-      });
-      return;
-    }
-
-    if (req.file.size > MAX_FILE_SIZE) {
-      res.status(413).json({
-        code: 'ValidationError',
-        message: 'File size must be less than 2MB',
-      });
-      return;
-    }
-
     try {
-      const { blogId } = req.params;
-      const blog = await Blog.findById(blogId).select('banner.publicId').exec();
-
-      const data = await uploadToCloudinary(
-        req.file.buffer,
-        blog?.banner.publicId.replace('blog-api/', ''),
-      );
-
-      if (!data) {
-        res.status(500).json({
-          code: 'ServerError',
-          message: 'Internal server error',
-        });
-
-        logger.error('Error while uploading blog banner to cloudinary', {
-          blogId,
-          publicId: blog?.banner.publicId,
-        });
-        return;
+      /**
+       * ✅ Allow PUT requests without a new image
+       */
+      if (method === 'put' && !req.file) {
+        return next();
       }
 
-      const newBanner = {
-        publicId: data.public_id,
-        url: data.secure_url,
-        width: data.width,
-        height: data.height,
+      /**
+       * ❌ Validate file presence
+       */
+      if (!req.file) {
+        return res.status(400).json({
+          code: 'ValidationError',
+          message: 'Blog banner is required',
+        });
+      }
+
+      /**
+       * ❌ Validate file size
+       */
+      if (req.file.size > MAX_FILE_SIZE) {
+        return res.status(413).json({
+          code: 'ValidationError',
+          message: `File size must be less than ${MAX_FILE_SIZE / (1024 * 1024)}MB`,
+        });
+      }
+
+      /**
+       * 🧠 Determine existing publicId (ONLY for PUT)
+       */
+      let existingPublicId: string | undefined;
+
+      if (method === 'put') {
+        const { blogId } = req.params;
+
+        const blog = await Blog.findById(blogId)
+          .select('banner.publicId')
+          .lean()
+          .exec();
+
+        existingPublicId = blog?.banner?.publicId
+          ? blog.banner.publicId.replace('blog-api/', '')
+          : undefined;
+      }
+
+      /**
+       * ☁️ Upload to Cloudinary
+       */
+      const uploadResult = await uploadToCloudinary(
+        req.file.buffer,
+        existingPublicId
+      );
+
+      if (!uploadResult) {
+        logger.error('Cloudinary upload returned null/undefined');
+
+        return res.status(500).json({
+          code: 'ServerError',
+          message: 'Image upload failed',
+        });
+      }
+
+      /**
+       * 🧾 Build banner object
+       */
+      const banner = {
+        publicId: uploadResult.public_id,
+        url: uploadResult.secure_url,
+        width: uploadResult.width,
+        height: uploadResult.height,
       };
 
-      logger.info('Blog banner uploaded to cloudinary', {
-        blogId,
-        banner: newBanner,
+      logger.info('Blog banner uploaded successfully', {
+        banner,
       });
 
-      req.body.banner = newBanner;
+      /**
+       * 📦 Attach to request body for controller
+       */
+      req.body.banner = banner;
 
-      next();
+      return next();
     } catch (err: UploadApiErrorResponse | any) {
-      res.status(err.http_code).json({
-        code: err.http_code < 500 ? 'ValidationError' : err.name,
-        message: err.message,
-      });
+      const statusCode = err?.http_code || 500;
 
-      logger.error('Error while uploading blog banner to cloudinary', err);
+      logger.error('Error uploading blog banner', err);
+
+      return res.status(statusCode).json({
+        code: statusCode < 500 ? 'ValidationError' : 'ServerError',
+        message: err?.message || 'Unexpected upload error',
+      });
     }
   };
 };
