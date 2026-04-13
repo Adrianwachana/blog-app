@@ -80,7 +80,7 @@ app.use(cors(corsOptions));
 
 /**
  * BODY PARSERS
- * Increase request payload limit to 5MB
+ * Increase request payload limit to 5MB tests
  */
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ limit: '5mb', extended: true }));
